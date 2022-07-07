@@ -2,6 +2,14 @@ use std::env::args;
 use std::collections::HashSet;
 use rand::{thread_rng, Rng};
 
+fn print_help() {
+    println!("pwgen FAMILIES [LENGTH]");
+    println!("Generates a random password. FAMILIES must be a string of these characters.");
+    println!("  a: lower case alphabets");
+    println!("  A: upper case alphabets");
+    println!("  n: numbers");
+}
+
 fn chars(family: char) -> Vec<char> {
     (match family {
         'a' => "abcdefghijklmnopqrstuvwxyz",
@@ -29,8 +37,17 @@ fn pwgen(characters: &[char], len: u8) -> String {
 }
 
 fn main() {
-    let args: Vec<String> = args().collect();
-    let families: HashSet<char> = args[1].chars().collect();
-    let len: u8 = if args.len() > 2 { args[2].parse().unwrap() } else { 15 };
-    println!("{}", pwgen(&select_chars(families), len));
+    let mut args = args();
+    args.next();
+    match args.next().as_deref() {
+        Some("help") | Some("--help") | Some("-h") | None => print_help(),
+        Some(x) => {
+            let families: HashSet<char> = x.chars().collect();
+            let len: u8 = match args.next() {
+                Some(y) => y.parse().unwrap(),
+                None => 15,
+            };
+            println!("{}", pwgen(&select_chars(families), len))
+        },
+    }
 }
