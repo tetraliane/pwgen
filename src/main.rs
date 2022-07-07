@@ -14,7 +14,7 @@ fn chars(family: char) -> Vec<char> {
     }).chars().collect()
 }
 
-fn all_chars(families: HashSet<char>) -> Vec<char> {
+fn select_chars(families: HashSet<char>) -> Vec<char> {
     families.into_iter().map(|fam| chars(fam)).flatten().collect()
 }
 
@@ -31,5 +31,6 @@ fn pwgen(characters: &[char], len: u8) -> String {
 fn main() {
     let args: Vec<String> = args().collect();
     let families: HashSet<char> = args[1].chars().collect();
-    println!("{}", pwgen(&all_chars(families), 15));
+    let len: u8 = if args.len() > 2 { args[2].parse().unwrap() } else { 15 };
+    println!("{}", pwgen(&select_chars(families), len));
 }
