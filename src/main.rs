@@ -1,29 +1,35 @@
+use std::env::args;
+use std::collections::HashSet;
 use rand::{thread_rng, Rng};
 
-fn pickup(characters: &[String]) -> String {
-    let mut rng = thread_rng();
-    let ind: usize = rng.gen_range(0..characters.len());
-    characters[ind].clone()
+fn chars(family: char) -> Vec<char> {
+    (match family {
+        'a' => "abcdefghijklmnopqrstuvwxyz",
+        'A' => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        'n' => "0123456789",
+        _ => {
+            eprintln!("pwgen: Unknown character family: '{}'", family);
+            ""
+        }
+    }).chars().collect()
 }
 
-fn pwgen(characters: &[String], len: u8) -> String {
-    if len == 0 {
-        String::new()
-    } else {
-        pwgen(characters, len-1) + &pickup(characters)
-    }
+fn all_chars(families: HashSet<char>) -> Vec<char> {
+    families.into_iter().map(|fam| chars(fam)).flatten().collect()
+}
+
+fn pickup(characters: &[char]) -> char {
+    let mut rng = thread_rng();
+    let ind: usize = rng.gen_range(0..characters.len());
+    characters[ind]
+}
+
+fn pwgen(characters: &[char], len: u8) -> String {
+    (0..len).map(|_| pickup(characters)).collect()
 }
 
 fn main() {
-    let ab = [
-        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-        'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-    ];
-    let ab_lower: Vec<String> = ab.map(|x| x.to_string()).into();
-    let ab_upper: Vec<String> = ab.map(|x| x.to_string().to_uppercase()).into();
-    let numbers = Vec::from_iter((0..10).map(|x: u8| x.to_string()));
-    let characters = [ab_lower, ab_upper, numbers].concat();
-
-    let pw = pwgen(&characters, 15);
-    println!("{}", pw);
+    let args: Vec<String> = args().collect();
+    let families: HashSet<char> = args[1].chars().collect();
+    println!("{}", pwgen(&all_chars(families), 15));
 }
