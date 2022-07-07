@@ -8,6 +8,7 @@ fn print_help() {
     println!("  a: lower case alphabets");
     println!("  A: upper case alphabets");
     println!("  n: numbers");
+    println!("  s: symbols");
 }
 
 fn chars(family: char) -> Vec<char> {
@@ -15,6 +16,7 @@ fn chars(family: char) -> Vec<char> {
         'a' => "abcdefghijklmnopqrstuvwxyz",
         'A' => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
         'n' => "0123456789",
+        's' => "!?#$%&@_,.+-*/^=~\"'()[]{}<>",
         _ => {
             eprintln!("pwgen: Unknown character family: '{}'", family);
             ""
