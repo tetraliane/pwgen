@@ -49,8 +49,12 @@ fn main() {
                 eprintln!("pwgen: {}", e);
                 process::exit(1)
             });
-            let len: u8 = match args.next() {
-                Some(y) => y.parse().unwrap(),
+            let len: u8 = match args.next().map(|y| y.parse()) {
+                Some(Ok(l)) => l,
+                Some(Err(e)) => {
+                    eprintln!("pwgen: {}", e);
+                    process::exit(1)
+                }
                 None => 15,
             };
             println!("{}", pwgen::pwgen(&families, len, &mut rand::thread_rng()))
