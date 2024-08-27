@@ -3,14 +3,14 @@ use std::env::args;
 
 use rand::{thread_rng, Rng};
 
-fn print_help() {
-    println!("pwgen FAMILIES [LENGTH]");
-    println!("Generates a random password. FAMILIES must be a string of these characters.");
-    println!("  a: lower case alphabets");
-    println!("  A: upper case alphabets");
-    println!("  n: numbers");
-    println!("  s: symbols");
-}
+const HELP_MESSAGE: &'static str = concat!(
+    "Usage: pwgen FAMILIES [LENGTH]\n",
+    "Generates a random password. FAMILIES must consist of these characters.\n",
+    "  a: lower case alphabets\n",
+    "  A: upper case alphabets\n",
+    "  n: numbers\n",
+    "  s: symbols\n",
+);
 
 fn chars(family: char) -> Vec<char> {
     (match family {
@@ -45,7 +45,7 @@ fn main() {
     let mut args = args();
     args.next();
     match args.next().as_deref() {
-        Some("help") | Some("--help") | Some("-h") | None => print_help(),
+        Some("help") | Some("--help") | Some("-h") | None => print!("{}", HELP_MESSAGE),
         Some(x) => {
             let families: HashSet<char> = x.chars().collect();
             let len: u8 = match args.next() {
