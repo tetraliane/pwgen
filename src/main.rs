@@ -1,5 +1,6 @@
-use std::env::args;
 use std::collections::HashSet;
+use std::env::args;
+
 use rand::{thread_rng, Rng};
 
 fn print_help() {
@@ -21,11 +22,13 @@ fn chars(family: char) -> Vec<char> {
             eprintln!("pwgen: Unknown character family: '{}'", family);
             ""
         }
-    }).chars().collect()
+    })
+    .chars()
+    .collect()
 }
 
 fn select_chars(families: HashSet<char>) -> Vec<char> {
-    families.into_iter().map(|fam| chars(fam)).flatten().collect()
+    families.into_iter().map(chars).flatten().collect()
 }
 
 fn pickup(characters: &[char]) -> char {
@@ -50,6 +53,6 @@ fn main() {
                 None => 15,
             };
             println!("{}", pwgen(&select_chars(families), len))
-        },
+        }
     }
 }
