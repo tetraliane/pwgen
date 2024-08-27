@@ -1,5 +1,4 @@
-use std::collections::HashSet;
-use std::env::args;
+use std::{env::args, process};
 
 use rand::{thread_rng, Rng};
 
@@ -12,23 +11,35 @@ const HELP_MESSAGE: &'static str = concat!(
     "  s: symbols\n",
 );
 
-fn chars(family: char) -> Vec<char> {
-    (match family {
-        'a' => "abcdefghijklmnopqrstuvwxyz",
-        'A' => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        'n' => "0123456789",
-        's' => "!?#$%&@_,.+-*/^=~\"'()[]{}<>",
-        _ => {
-            eprintln!("pwgen: Unknown character family: '{}'", family);
-            ""
-        }
-    })
-    .chars()
-    .collect()
+enum Family {
+    LowerAlph,
+    UpperAlph,
+    Numbers,
+    Symbols,
 }
 
-fn select_chars(families: HashSet<char>) -> Vec<char> {
-    families.into_iter().map(chars).flatten().collect()
+impl Family {
+    fn chars(&self) -> Vec<char> {
+        match self {
+            Self::LowerAlph => "abcdefghijklmnopqrstuvwxyz".chars().collect(),
+            Self::UpperAlph => "ABCDEFGHIJKLMNOPQRSTUVWXYZ".chars().collect(),
+            Self::Numbers => "0123456789".chars().collect(),
+            Self::Symbols => "!?#$%&@_,.+-*/^=~\"'()[]{}<>".chars().collect(),
+        }
+    }
+}
+
+fn parse_families(families: &[char]) -> Result<Vec<Family>, FamilyError> {
+    families
+        .into_iter()
+        .map(|f| match f {
+            'a' => Ok(Family::LowerAlph),
+            'A' => Ok(Family::UpperAlph),
+            'n' => Ok(Family::Numbers),
+            's' => Ok(Family::Symbols),
+            _ => Err(FamilyError { actual: *f }),
+        })
+        .collect()
 }
 
 fn pickup(characters: &[char]) -> char {
@@ -37,9 +48,23 @@ fn pickup(characters: &[char]) -> char {
     characters[ind]
 }
 
-fn pwgen(characters: &[char], len: u8) -> String {
-    (0..len).map(|_| pickup(characters)).collect()
+fn pwgen(families: &[Family], len: u8) -> String {
+    let characters = families.iter().flat_map(Family::chars).collect::<Vec<_>>();
+    (0..len).map(|_| pickup(&characters)).collect()
 }
+
+#[derive(Debug)]
+struct FamilyError {
+    actual: char,
+}
+
+impl std::fmt::Display for FamilyError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Invalid family: \"{}\"", self.actual)
+    }
+}
+
+impl std::error::Error for FamilyError {}
 
 fn main() {
     let mut args = args();
@@ -47,12 +72,15 @@ fn main() {
     match args.next().as_deref() {
         Some("help") | Some("--help") | Some("-h") | None => print!("{}", HELP_MESSAGE),
         Some(x) => {
-            let families: HashSet<char> = x.chars().collect();
+            let families = parse_families(&x.chars().collect::<Vec<_>>()).unwrap_or_else(|e| {
+                eprintln!("pwgen: {}", e);
+                process::exit(1)
+            });
             let len: u8 = match args.next() {
                 Some(y) => y.parse().unwrap(),
                 None => 15,
             };
-            println!("{}", pwgen(&select_chars(families), len))
+            println!("{}", pwgen(&families, len))
         }
     }
 }
