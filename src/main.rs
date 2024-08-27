@@ -1,6 +1,6 @@
 use std::{env::args, process};
 
-use rand::{thread_rng, Rng};
+use rand::Rng;
 
 const HELP_MESSAGE: &'static str = concat!(
     "Usage: pwgen FAMILIES [LENGTH]\n",
@@ -42,15 +42,14 @@ fn parse_families(families: &[char]) -> Result<Vec<Family>, FamilyError> {
         .collect()
 }
 
-fn pickup(characters: &[char]) -> char {
-    let mut rng = thread_rng();
+fn pickup<R: Rng>(characters: &[char], rng: &mut R) -> char {
     let ind: usize = rng.gen_range(0..characters.len());
     characters[ind]
 }
 
-fn pwgen(families: &[Family], len: u8) -> String {
+fn pwgen<R: Rng>(families: &[Family], len: u8, rng: &mut R) -> String {
     let characters = families.iter().flat_map(Family::chars).collect::<Vec<_>>();
-    (0..len).map(|_| pickup(&characters)).collect()
+    (0..len).map(|_| pickup(&characters, rng)).collect()
 }
 
 #[derive(Debug)]
@@ -80,7 +79,7 @@ fn main() {
                 Some(y) => y.parse().unwrap(),
                 None => 15,
             };
-            println!("{}", pwgen(&families, len))
+            println!("{}", pwgen(&families, len, &mut rand::thread_rng()))
         }
     }
 }
