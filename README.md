@@ -9,6 +9,15 @@ Run the following command on your terminal.
 pwgen FAMILIES [LENGTH]
 ```
 
+You can use it as a library in your project.
+
+```rust
+use pwgen::{pwgen, Family};
+
+let mut rng = rand::thread_rng();
+let password = pwgen(&[Family::LowerAlph, Family::UpperAlph], 10, &mut rng);
+```
+
 ## Options
 
 - `FAMILIES`
@@ -24,7 +33,7 @@ pwgen FAMILIES [LENGTH]
 
   Length of the password.
   (default: 15)
- 
+
 ## Examples
 
 Generate a 12-character long password containing lowercase alphabets,
