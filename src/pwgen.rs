@@ -10,6 +10,7 @@ fn pickup<R: Rng>(characters: &[char], rng: &mut R) -> char {
     characters[ind]
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Family {
     LowerAlph,
     UpperAlph,
